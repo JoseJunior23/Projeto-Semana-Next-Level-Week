@@ -1,38 +1,53 @@
 import React from 'react';
 import whatsappIcon from '../../assets/images/icons/whatsapp.svg'
-
+import api from '../../services/api';
 import './styles.css';
 
-function TeacherItem (){
-    return( 
 
-<article className="teacher-item">
-<header>
+ export interface Teacher {
+    id: number;
+    avatar: string;
+    bio: string;
+    cost: string;
+    name:string;
+    subject: string;
+    whatsapp: string;
+}
+
+interface TeacherItemProps{
+    teacher: Teacher;
+}
+
+const TeacherItem: React.FC<TeacherItemProps> = ({teacher}) =>{
+    function createNewConnection(){
+       api.post('connections', {
+           user_id:teacher.id,
+       }) 
+    }
+
+
+return( 
+
+    <article className="teacher-item">
+    <header>
     
-<img src="https://avatars1.githubusercontent.com/u/37146600?s=460&u=015abca501d1392779f36f5624e4aade4c79177f&v=4" alt="José Junior"/>
-<div>
-    <strong>José Junior</strong>
-    <span>Física</span>
-</div>
-</header>
-<p>
-    Entusiasta da ciencia da natureza
-    <br /> <br/>
-    Sempre buscando novos conhecimentos na da astronimia fisica classica e moderna. Para estar sempre aprendendo mais.
-
-</p>
-<footer>
+    <img src={teacher.avatar} alt={teacher.name}/>
+    <div>
+        <strong>{teacher.name}</strong>
+        <span>{teacher.subject}</span>
+    </div>
+    </header>
+    <p>{teacher.bio}</p>
+    <footer>
 
     <p>
         preço/hora
-        <strong> 
-            R$ 70:00
-        </strong>
+        <strong>{teacher.cost}</strong>
     </p>
-    <button type="button">
+    <a target="_blank" onClick={createNewConnection} href={`https://wa.me/${teacher.whatsapp}`}>
         <img src={whatsappIcon} alt="whatsapp"/>
         Entrar em contato
-    </button>
+    </a>
 </footer>
 </article>
     )

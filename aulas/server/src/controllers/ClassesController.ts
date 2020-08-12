@@ -1,6 +1,6 @@
 import {Request, Response } from 'express';
 import db from '../database/connection';
-import convertHourToMinites from '../utils/converterHoursToMinutes';
+import convertHourToMinutes from '../utils/converterHoursToMinutes';
 
 interface ScheduleItem {
     week_day: number;
@@ -22,21 +22,20 @@ export default class ClassesController{
             })
         }
 
-        const  timeInMinutes = convertHourToMinites(time);
+        const  timeInMinutes = convertHourToMinutes(time);
         
         const classes = await db('classes')
-        // .whereExists(function(){
-        //     this.select('class_schedule.*')
-        //     .from('class_schedule')
-        //     .whereRaw('`class_schedule`.`class_id` = `classes`.`id`')
-        //     .whereRaw('`class_schedule`.`week_day` = ??', [Number(week_day)])
-        //     .whereRaw('`class_schedule`.`from`<= ?? ', [timeInMinutes])
-        //     .whereRaw('`class_schedule`.`from` > ??', [timeInMinutes])
-
-        // })
+        .whereExists(function(){
+            this.select('class_schedule.*')
+              .from('class_schedule')
+              .whereRaw('`class_schedule`.`class_id` = `classes`.`id`')
+              .whereRaw('`class_schedule`.`week_day` = ??', [Number(week_day)])
+              .whereRaw('`class_schedule`.`from` <= ??', [timeInMinutes])
+              .whereRaw('`class_schedule`.`to` > ??', [timeInMinutes])
+        })
         .where('classes.subject', '=', subject)
-        // .join('users', 'classes.users_id', '=', 'users.id')
-        // .select(['classes.*', 'users.*']);
+        .join('users', 'classes.user_id', '=', 'users.id')
+        .select(['classes.*', 'users.*']);
 
          return response.json(classes);
     }
@@ -76,8 +75,8 @@ export default class ClassesController{
             return {
                 class_id,
                 week_day: scheduleItem.week_day,
-                from: convertHourToMinites(scheduleItem.from),
-                to: convertHourToMinites(scheduleItem.to)
+                from: convertHourToMinutes(scheduleItem.from),
+                to: convertHourToMinutes(scheduleItem.to)
     
             };
         })
